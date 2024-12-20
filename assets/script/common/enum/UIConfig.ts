@@ -10,6 +10,8 @@ export enum UIID {
     Confirm,
     /** 登录界面 */
     Login,
+    /** 大厅界面 */
+    Hall,
 }
 
 /** 打开界面方式的配置数据 */
@@ -18,4 +20,5 @@ export const UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Confirm]: { layer: LayerType.Dialog, prefab: "common/prefab/confirm", mask: true },
     [UIID.Loading]: { layer: LayerType.UI, prefab: "gui/loading/loading" },
     [UIID.Login] : {layer: LayerType.UI, prefab: "gui/login/login"},
+    [UIID.Hall] : {layer: LayerType.UI, prefab: "gui/hall/hall"},
 }

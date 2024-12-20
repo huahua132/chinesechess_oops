@@ -5,6 +5,9 @@ import { CCVMParentComp } from "../../../../../extensions/oops-plugin-framework/
 import {HttpRequest, HttpReturn} from "../../../../libs/network/Http"
 import {connectOpt} from "../../../../libs/network/NetNodeManager"
 import { smc } from "../../../common/SingletonModuleComp"
+import { ModuleUtil } from "../../../../../extensions/oops-plugin-framework/assets/module/common/ModuleUtil";
+import { UIID } from "../../../common/enum/UIConfig"
+import {HallViewComp} from "../../../hall/hall/view/HallViewComp"
 
 const {ccclass, property} = _decorator
 
@@ -89,8 +92,11 @@ export class LoginViewComp extends CCVMParentComp {
                         connected : ()=> {
                             console.log("连接大厅服成功 !!!>>>>>>>>>>>>>")
                         },
-                        authSuccCb :()=> {
-                            console.log("登录大厅服成功 !!!>>>>>>>>>>>>")
+                        authSuccCb : async ()=> {
+                            console.log("登录大厅服成功 !!!>>>>>>>>>>>>", smc.hall)
+                            smc.hall.HallModel.PlayerId = playerId;
+                            await ModuleUtil.addViewUiAsync(smc.hall, HallViewComp, UIID.Hall);
+                            ModuleUtil.removeViewUi(this.ent, LoginViewComp, UIID.Login);
                         }
                     }
                     smc.net.TryConnect("hall", opt)

@@ -10,6 +10,7 @@ import { oops } from '../../extensions/oops-plugin-framework/assets/core/Oops';
 import { Root } from '../../extensions/oops-plugin-framework/assets/core/Root';
 import { ecs } from '../../extensions/oops-plugin-framework/assets/libs/ecs/ECS';
 import { Account } from './login/account/Account';
+import {HallEntity} from "./hall/hall/Hall"
 import { smc } from "./common/SingletonModuleComp"
 import { UIConfigData } from './common/enum/UIConfig';
 import { Initialize } from './login/initialize/Initialize';
@@ -41,6 +42,7 @@ export class Main extends Root {
 
         smc.initialize = ecs.getEntity<Initialize>(Initialize);
         smc.account = ecs.getEntity<Account>(Account);
+        smc.hall = ecs.getEntity<HallEntity>(HallEntity);
     }
 
     protected initGui() {
