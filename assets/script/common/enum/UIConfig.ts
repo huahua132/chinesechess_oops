@@ -12,6 +12,8 @@ export enum UIID {
     Login,
     /** 大厅界面 */
     Hall,
+    /** 匹配成功窗口 */
+    Match,
 }
 
 /** 打开界面方式的配置数据 */
@@ -21,4 +23,5 @@ export const UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Loading]: { layer: LayerType.UI, prefab: "gui/loading/loading" },
     [UIID.Login] : {layer: LayerType.UI, prefab: "gui/login/login"},
     [UIID.Hall] : {layer: LayerType.UI, prefab: "gui/hall/hall"},
+    [UIID.Match] : {layer: LayerType.PopUp, prefab: "gui/hall/match"},
 }

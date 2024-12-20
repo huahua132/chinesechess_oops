@@ -3,6 +3,7 @@ import { _decorator } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import {HallEntity} from "../Hall"
+import { math } from "cc";
 
 const { ccclass, property } = _decorator;
 
@@ -17,6 +18,21 @@ export class HallViewComp extends CCComp {
         this.setButton();
         this.nodeTreeInfoLite();
         this.RefreshPlayerInfo();
+
+        this.getNode("matching")!.active = false;
+    }
+
+    //显示匹配中
+    ShowMatching() {
+        const entity = this.ent as HallEntity;
+        let matching = this.getNode("matching");
+        matching!.active = true;
+        matching!.getComponent(Label)!.string = "匹配中 " + Math.floor(entity.HallModel.MatchTime) + ' S';
+    }
+
+    //取消显示匹配中
+    CancelMatching() {
+        this.getNode("matching")!.active = false;
     }
 
     //刷新玩家信息
