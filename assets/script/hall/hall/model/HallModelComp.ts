@@ -8,14 +8,10 @@ export class HallModelComp extends ecs.Comp {
     NickName: string = "";      //玩家昵称
     RankScore: number = 0;      //玩家分数
 
-    //匹配
-    MatchTime : number = 0;     //匹配记时
-
     /** 数据层组件移除时，重置所有数据为默认值 */
     reset() {
         this.PlayerId = 0;
         this.NickName = "";
         this.RankScore = 0;
-        this.MatchTime = 0;
     }
 }
