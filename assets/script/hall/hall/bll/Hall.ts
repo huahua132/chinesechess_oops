@@ -8,7 +8,8 @@ import { ModuleUtil } from "../../../../../extensions/oops-plugin-framework/asse
 import { MatchViewComp } from "../../match/view/MatchViewComp";
 import { MatchBllComp } from "../../match/bll/MatchBll";
 import { MatchEntity } from "../../match/Match";
-import { UIID } from "../../../common/enum/UIConfig"
+import { UIID } from "../../../common/enum/UIConfig";
+import { EVENT } from "../../../common/enum/EVENT";
 
 let MATCH_STATE = {
     NOT_MATCHING : 0,
@@ -37,6 +38,11 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
 
     entityEnter(entity: HallEntity): void {
         // 注：自定义业务逻辑
+        let matchEntity = ecs.getEntity<MatchEntity>(MatchEntity);
+
+        oops.message.on(EVENT.MATCH_TIME_OUT, this.onEventHandler, this);
+        oops.message.on(EVENT.ACCEPT_MATCH, this.onEventHandler, this);
+        oops.message.on(EVENT.CANCEL_MATCH, this.onEventHandler, this);
 
         //收到玩家信息
         smc.net.GetNode("hall").RegPushHandle("hallserver_player", "PlayerInfoNotice", (msgBody: hallserver_player.IPlayerInfoNotice)=> {
@@ -51,13 +57,48 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
         //收到匹配结果
         smc.net.GetNode("hall").RegPushHandle("hallserver_match", "MatchGameNotice", (msgbody: hallserver_match.IMatchGameNotice)=> {
             console.log("收到匹配结果 >>> ", msgbody)
-            let matchEntity = ecs.getEntity<MatchEntity>(MatchEntity);
             matchEntity.addComponents<ecs.Comp>(MatchBllComp);
+            ModuleUtil.addViewUi(matchEntity, MatchViewComp, UIID.Match);
             matchEntity.MatchBll.GameId = msgbody.gameId!;
             matchEntity.MatchBll.RemainTime = msgbody.remainTime!;
             matchEntity.MatchBll.SessionId = msgbody.sessionId!;
-            ModuleUtil.addViewUi(matchEntity, MatchViewComp, UIID.Match);
         })
+    }
+
+    //匹配超时
+    onMatchTimeOut(args: any) {
+        //再次请求匹配
+        if (smc.hall.HallBll.MatchState == MATCH_STATE.MATCHING_SUCC) {
+            setTimeout(()=>{
+                smc.hall.HallBll.MatchState = MATCH_STATE.NOT_MATCHING;
+                smc.hall.HallBll.IsMatchBtn = true;
+            }, 1000); 
+        } else {
+            smc.hall.HallBll.IsStartMatch = false;
+            smc.hall.HallBll.MatchState = MATCH_STATE.NOT_MATCHING;
+        }
+    }
+
+    //同意匹配
+    onAcceptMatch(args: any) {
+        smc.hall.HallBll.MatchState = MATCH_STATE.MATCHING_SUCC;
+    }
+
+    //拒绝匹配
+    onCancelMatch(args: any) {
+        smc.hall.HallBll.IsStartMatch = false;
+        smc.hall.HallBll.MatchState = MATCH_STATE.NOT_MATCHING;
+    }
+
+    onEventHandler(event: string, args: any) {
+        switch (event) {
+            case EVENT.MATCH_TIME_OUT:
+                return this.onMatchTimeOut(args);
+            case EVENT.ACCEPT_MATCH:
+                return this.onAcceptMatch(args);
+            case EVENT.CANCEL_MATCH:
+                return this.onCancelMatch(args);
+        }
     }
 
     update(entity: HallEntity) {

@@ -276,11 +276,17 @@ export class NetNode {
                     msgBody : msgBody,
                     errmsg : "",
                 }
+                if (msgtype == MSG_TYPE.SERVER_ERR) {
+                    Logger.logNet(msgBody, `rsp error msg nodename[${this._name}] packid[${packid}]`)
+                }
                 resultObj.resolve(rsp);
                 return;
             } else {
                 let handle = this._pushHandles[packid];
                 if (handle) {
+                    if (msgtype == MSG_TYPE.SERVER_ERR) {
+                        Logger.logNet(msgBody, `push error msg nodename[${this._name}] packid[${packid}]`)
+                    }
                     handle(msgBody);
                 } else {
                     Logger.logNet(`drop package nodename[${this._name}] packid[${packid}]`);
@@ -349,11 +355,17 @@ export class NetNode {
                     msgBody : msgBody,
                     errmsg : "",
                 }
+                if (msgtype == MSG_TYPE.SERVER_ERR) {
+                    Logger.logNet(msgBody, `rsp error msg nodename[${this._name}] packid[${packid}]`)
+                }
                 resultObj.resolve(rsp);
                 return;
             } else {
                 let handle = this._pushHandles[packid];
                 if (handle) {
+                    if (msgtype == MSG_TYPE.SERVER_ERR) {
+                        Logger.logNet(msgBody, `push error msg nodename[${this._name}] packid[${packid}]`)
+                    }
                     handle(msgBody);
                 } else {
                     Logger.logNet(`drop package nodename[${this._name}] packid[${packid}]`);
