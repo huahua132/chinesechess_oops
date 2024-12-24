@@ -16,6 +16,7 @@ import { UIConfigData } from './common/enum/UIConfig';
 import { Initialize } from './login/initialize/Initialize';
 import {PACKS} from "./common/enum/PACK"
 import {Opt} from "../libs/network/NetNodeManager"
+import {BoardEntity} from "./game/board/BoardEntity"
 
 const { ccclass, property } = _decorator;
 
@@ -43,6 +44,7 @@ export class Main extends Root {
         smc.initialize = ecs.getEntity<Initialize>(Initialize);
         smc.account = ecs.getEntity<Account>(Account);
         smc.hall = ecs.getEntity<HallEntity>(HallEntity);
+        smc.game = ecs.getEntity<BoardEntity>(BoardEntity);
     }
 
     protected initGui() {

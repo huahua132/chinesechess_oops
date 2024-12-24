@@ -10,6 +10,10 @@ import { MatchBllComp } from "../../match/bll/MatchBll";
 import { MatchEntity } from "../../match/Match";
 import { UIID } from "../../../common/enum/UIConfig";
 import { EVENT } from "../../../common/enum/EVENT";
+import {connectOpt} from "../../../../libs/network/NetNodeManager"
+import { BoardBllComp } from "../../../game/board/bll/BoardBll";
+import { BoardViewComp } from "../../../game/board/view/BoardViewComp";
+import { HallViewComp } from "../view/HallViewComp";
 
 let MATCH_STATE = {
     NOT_MATCHING : 0,
@@ -62,6 +66,27 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
             matchEntity.MatchBll.GameId = msgbody.gameId!;
             matchEntity.MatchBll.RemainTime = msgbody.remainTime!;
             matchEntity.MatchBll.SessionId = msgbody.sessionId!;
+        })
+
+        //收到通知进入游戏
+        smc.net.GetNode("hall").RegPushHandle("hallserver_match", "JoinGameNotice", (msgbody: hallserver_match.IJoinGameNotice)=> {
+            console.log("收到通知进入游戏 >>> ", msgbody)
+            let opt :connectOpt = {
+                host : msgbody.gamehost!,
+                token : msgbody.gametoken!,
+                playerId : smc.hall.HallModel.PlayerId,
+                protocol : "ws",
+                connected : ()=> {
+                    console.log("连接游戏服成功 !!!>>>>>>>>>>>>>")
+                },
+                authSuccCb : async ()=> {
+                    console.log("登录游戏服成功 !!!>>>>>>>>>>>>", smc.game)
+                    smc.game.addComponents<ecs.Comp>(BoardBllComp);
+                    await ModuleUtil.addViewUiAsync(smc.game, BoardViewComp, UIID.board);
+                    ModuleUtil.removeViewUi(smc.hall, HallViewComp, UIID.Hall);
+                }
+            }
+            smc.net.TryConnect("game", opt)
         })
     }
 
