@@ -25,11 +25,18 @@ let MATCH_STATE = {
 export class HallBllComp extends ecs.Comp {
     //匹配
     IsMatchBtn : boolean = false;        //是否点击了匹配按钮
+    IsJoinGame : boolean = false;        //是否进入游戏
     IsStartMatch : boolean = false;      //是否开始匹配
     MatchingReqing : boolean = false;    //匹配请求中 
     MatchTime : number = 0;              //匹配记时
     MatchState : number = 0;             //匹配状态  0没有匹配  1匹配中  2匹配成功
     reset() {
+        this.IsMatchBtn = false;
+        this.IsJoinGame = false;
+        this.IsStartMatch = false;
+        this.MatchingReqing = false;
+        this.MatchTime = 0;
+        this.MatchState = 0;
     }
 }
 
@@ -70,7 +77,8 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
 
         //收到通知进入游戏
         smc.net.GetNode("hall").RegPushHandle("hallserver_match", "JoinGameNotice", (msgbody: hallserver_match.IJoinGameNotice)=> {
-            console.log("收到通知进入游戏 >>> ", msgbody)
+            smc.hall.HallBll.IsJoinGame = true;
+            console.log("收到通知进入游戏 >>> ", msgbody, smc.hall.HallBll.IsMatchBtn);
             let opt :connectOpt = {
                 host : msgbody.gamehost!,
                 token : msgbody.gametoken!,
@@ -82,7 +90,9 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
                 authSuccCb : async ()=> {
                     console.log("登录游戏服成功 !!!>>>>>>>>>>>>", smc.game)
                     smc.game.addComponents<ecs.Comp>(BoardBllComp);
-                    await ModuleUtil.addViewUiAsync(smc.game, BoardViewComp, UIID.board);
+                    smc.game.BoardBll.tableId = msgbody.tableId!;
+                    await ModuleUtil.addViewUiAsync(smc.game, BoardViewComp, UIID.Board);
+                    ModuleUtil.removeViewUi(matchEntity, MatchViewComp, UIID.Match);
                     ModuleUtil.removeViewUi(smc.hall, HallViewComp, UIID.Hall);
                 }
             }
@@ -129,7 +139,7 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
     update(entity: HallEntity) {
         //console.log("dt >>> ", this.dt);
         //开始匹配
-        if (entity.HallBll.IsMatchBtn) {
+        if (entity.HallBll.IsMatchBtn && !entity.HallBll.IsJoinGame) {
             entity.HallBll.IsMatchBtn = false;
             if (entity.HallBll.IsStartMatch) {
                 let req = {

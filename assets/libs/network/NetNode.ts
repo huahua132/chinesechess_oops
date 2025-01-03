@@ -245,20 +245,20 @@ export class NetNode {
         let msgbuffer = body.msgbuffer;
         if (msgtype == MSG_TYPE.CLIENT_PUSH || msgtype == MSG_TYPE.CLIENT_REQ) {
             Logger.logNet(`invalid req nodename[${this._name}] packid[${packid}] msgtype[${msgtype}]`)
-            throw new Error(`invalid req nodename[${this._name}] packid[${packid}] msgtype[${msgtype}]`)
+            return;
         }
 
         let reqSession = null;
         if (msgtype != MSG_TYPE.SERVER_PUSH) {
             if (session % 2 != 0) {
                 Logger.logNet(`invalid req nodename[${this._name}] packid[${packid}] session[${session}]`)
-                throw new Error(`invalid req nodename[${this._name}] packid[${packid}] session[${session}]`)
+                return;
             }
             reqSession = session - 1;
         } else {
             if (session <= 0 || session > MAX_UINT32) {
                 Logger.logNet(`invalid push nodename[${this._name}] packid[${packid}] session[${session}]`)
-                throw new Error(`invalid push nodename[${this._name}] packid[${packid}] session[${session}]`)
+                return;
             }
         }
         //整包处理
@@ -268,7 +268,7 @@ export class NetNode {
             if (reqSession) {
                 if (!this._waitResultMap[reqSession]) {
                     Logger.logNet(`invalid rsp nodename[${this._name}] packid[${packid}] session[${session}]`)
-                    throw new Error(`invalid rsp nodename[${this._name}] packid[${packid}] session[${session}]`)
+                    return;
                 }
                 let resultObj = this._waitResultMap[reqSession]
                 let rsp: rpcRsp = {
@@ -305,7 +305,7 @@ export class NetNode {
         if (packtype == PACK_TYPE.HEAD) {
             if (msgMap[session]) {
                 Logger.logNet(`repeat session nodename[${this._name}] packid[${packid}] session[${session}]`)
-                throw new Error(`repeat session nodename[${this._name}] packid[${packid}] session[${session}]`)
+                return;
             }
             let msgsz : number = body.msgsz || 0
             msgMap[session] = {
@@ -321,11 +321,11 @@ export class NetNode {
             let oneMsg = msgMap[session];
             if (!oneMsg || !msgbuffer) {
                 Logger.logNet(`invalid BODY msg nodename[${this._name}] packid[${packid}] session[${session}] msgbuffer[${msgbuffer}]`)
-                throw new Error(`invalid BODY msg nodename[${this._name}] packid[${packid}] session[${session}] msgbuffer[${msgbuffer}]`)
+                return;
             }
             if (oneMsg.recvsz + msgbuffer.length > oneMsg.msgsz) {
                 Logger.logNet(`invalid BODY msg msgsz err nodename[${this._name}] packid[${packid}] session[${session}] recvsz[${oneMsg.recvsz + msgbuffer.length}] msgsz[${oneMsg.msgsz}]`)
-                throw new Error(`invalid BODY msg msgsz err nodename[${this._name}] packid[${packid}] session[${session}] recvsz[${oneMsg.recvsz + msgbuffer.length}] msgsz[${oneMsg.msgsz}]`)
+                return;
             }
             oneMsg.msgbuffer.set(msgbuffer, oneMsg.recvsz);
             oneMsg.recvsz += msgbuffer.length;
@@ -333,11 +333,11 @@ export class NetNode {
             let oneMsg = msgMap[session];
             if (!oneMsg || !msgbuffer) {
                 Logger.logNet(`invalid TAIL msg nodename[${this._name}] packid[${packid}] session[${session}] msgbuffer[${msgbuffer}]`)
-                throw new Error(`invalid TAIL msg nodename[${this._name}] packid[${packid}] session[${session}] msgbuffer[${msgbuffer}]`)
+                return;
             }
             if (oneMsg.recvsz + msgbuffer.length != oneMsg.msgsz) {
                 Logger.logNet(`invalid TAIL msg msgsz err nodename[${this._name}] packid[${packid}] session[${session}] recvsz[${oneMsg.recvsz + msgbuffer.length}] msgsz[${oneMsg.msgsz}]`)
-                throw new Error(`invalid TAIL msg msgsz err nodename[${this._name}] packid[${packid}] session[${session}] recvsz[${oneMsg.recvsz + msgbuffer.length}] msgsz[${oneMsg.msgsz}]`)
+                return;
             }
             oneMsg.msgbuffer.set(msgbuffer, oneMsg.recvsz);
             oneMsg.recvsz += msgbuffer.length;
@@ -347,7 +347,7 @@ export class NetNode {
             if (reqSession) {
                 if (!this._waitResultMap[reqSession]) {
                     Logger.logNet(`invalid rsp nodename[${this._name}] packid[${packid}] session[${session}]`)
-                    throw new Error(`invalid rsp nodename[${this._name}] packid[${packid}] session[${session}]`)
+                    return;
                 }
                 let resultObj = this._waitResultMap[reqSession];
                 let rsp: rpcRsp = {
@@ -374,7 +374,7 @@ export class NetNode {
             }
         } else {
             Logger.logNet(`invalid nodename[${this._name}] packid[${packid}] packtype[${packtype}]`)
-            throw new Error(`invalid nodename[${this._name}] packid[${packid}] packtype[${packtype}]`)
+            return;
         }
     }
 
@@ -480,7 +480,8 @@ export class NetNode {
     RegPushHandle(packname: string, msgname: string, callback: Function) {
         const packId = this._protoCode?.GetPackId(packname, msgname);
         if (this._pushHandles[packId]) {
-            throw new Error(`exists pushHandle packname[${packname}] msgname[${msgname}]`);
+            Logger.logNet(`exists pushHandle packname[${packname}] msgname[${msgname}]`)
+            return;
         }
         this._pushHandles[packId] = callback;
     }
@@ -494,7 +495,9 @@ export class NetNode {
         if (this._waitResultMap[session]) {
             throw new Error(`exists req nodename[${this._name}] session[${session}]`)
         }
-        this._socket?.send(overbuffer);
+        if (overbuffer) {
+            this._socket?.send(overbuffer);
+        }
         if (isShowTip) {
             this.updateNetTips(NetTipsType.Requesting, true);
         }
@@ -531,7 +534,9 @@ export class NetNode {
         const packId = this._protoCode?.GetPackId(packname, msgname);
         let msgbuffer = this._protoCode?.Encode(packId, msgbody);
         let overbuffer = protocol.pack(MSG_TYPE.CLIENT_PUSH, 0, packId, msgbuffer);
-        this._socket?.send(overbuffer);
+        if (overbuffer) {
+            this._socket?.send(overbuffer);
+        }
     }
     //关闭
     Close() {

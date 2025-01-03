@@ -59,7 +59,8 @@ export class NetProtobuf implements Iprotocode {
     //编码
     Encode(packid: number, msgBody: any) {
         if (!this._PACKNAME[packid]) {
-            throw new Error(`Encode not exists packid:${packid}`);
+            Logger.logNet(`Encode not exists packid:${packid}`)
+            return;
         }
         const info = this._PACKNAME[packid];
         let msgObj = this._proto[info.packname][info.msgname];
@@ -69,7 +70,8 @@ export class NetProtobuf implements Iprotocode {
     //解码
     Decode(packid: number, buffer: Uint8Array) {
         if (!this._PACKNAME[packid]) {
-            throw new Error(`Decode not exists packid:${packid}`);
+            Logger.logNet(`Decode not exists packid:${packid}`)
+            return;
         }
         const info = this._PACKNAME[packid];
         let msgObj = this._proto[info.packname][info.msgname];
@@ -79,10 +81,12 @@ export class NetProtobuf implements Iprotocode {
     //获取packid
     GetPackId(packname: string, msgname: string) {
         if (!this._PACK[packname]) {
-            throw new Error(`GetPackId not exists packname:${packname}`);
+            Logger.logNet(`GetPackId not exists packname:${packname}`)
+            return;
         }
         if (!this._PACK[packname][msgname]) {
-            throw new Error(`GetPackId not exists msgname:${msgname}`);
+            Logger.logNet(`GetPackId not exists msgname:${msgname}`)
+            return;
         }
 
         return this._PACK[packname][msgname];

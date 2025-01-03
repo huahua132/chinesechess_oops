@@ -1,3 +1,5 @@
+import { Logger } from "../../../extensions/oops-plugin-framework/assets/core/common/log/Logger";
+
 const MAX_UINT32: number = 2 ** 32 - 1;
 const MAX_UINT16: number = 2 ** 16 - 1;
 //包类型定义 
@@ -28,20 +30,24 @@ export interface Body {
 export class NetProtocol {
     pack(msgType: MSG_TYPE, session: number, packid: number, msgbuffer: Uint8Array) {
         if (session < 0 || session > MAX_UINT32) {
-            throw new Error(`invalid session:${session}`)
+            Logger.logNet(`invalid session:${session}`)
+            return;
         }
 
         if (packid < 0 || packid > MAX_UINT16) {
-            throw new Error(`invalid packid:${packid}`)
+            Logger.logNet(`invalid packid:${packid}`)
+            return;
         }
 
         let totalLen = 8 + msgbuffer.length;
         if (totalLen > MAX_UINT16) {
-            throw new Error(`buffer len cannot be greater than ${MAX_UINT32 - 8}`)
+            Logger.logNet(`buffer len cannot be greater than ${MAX_UINT32 - 8}`)
+            return;
         }
 
         if (msgType != MSG_TYPE.CLIENT_PUSH && msgType != MSG_TYPE.CLIENT_REQ) {
-            throw new Error(`msg type err ${msgType}`)
+            Logger.logNet(`msg type err ${msgType}`)
+            return;
         }
 
         let newBuffer = new ArrayBuffer(10 + msgbuffer.length);
@@ -63,11 +69,6 @@ export class NetProtocol {
         let view = new DataView(arrayBuffer);
         const totalLength = view.getUint16(0);
         
-        // 检查字节流是否足够长
-        if (arrayBuffer.byteLength != totalLength + 2) {
-            throw new Error(`Buffer is not long enough to contain the specified package.`)
-        }
-
         let body:Body = {
             packtype : 0,
             msgtype : 0,
@@ -76,6 +77,11 @@ export class NetProtocol {
             msgsz : null,
             msgbuffer : null,
         };
+        // 检查字节流是否足够长
+        if (arrayBuffer.byteLength != totalLength + 2) {
+            Logger.logNet(`Buffer is not long enough to contain the specified package.`)
+            return body;
+        }
         
         // 包类型
         body.packtype = view.getUint8(2);

@@ -1,6 +1,7 @@
 import { _decorator } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
+import { PosEntity } from "../PosEntity"
 
 const { ccclass, property } = _decorator;
 
@@ -10,7 +11,26 @@ const { ccclass, property } = _decorator;
 export class PosViewComp extends CCComp {
     /** 视图层逻辑代码分离演示 */
     start() {
-        // const entity = this.ent as ecs.Entity;         // ecs.Entity 可转为当前模块的具体实体对象
+        const entity = this.ent as PosEntity;         // ecs.Entity 可转为当前模块的具体实体对象
+        entity.PosView = this;                      // 绑定视图层组件
+        this.setButton();
+    }
+
+    setPos(x : number, y: number) {
+        this.node.setPosition(x, y);
+        this.hide();
+    }
+
+    show() {
+        this.node.active = true;
+    }
+
+    hide() {
+        this.node.active = false;
+    }
+
+    btnMove() {
+        console.log("btnMove >>> ");
     }
 
     /** 视图对象通过 ecs.Entity.remove(PosViewComp) 删除组件是触发组件处理自定义释放逻辑 */

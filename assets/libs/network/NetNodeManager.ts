@@ -1,6 +1,7 @@
 import {WebSock} from "../../../extensions/oops-plugin-framework/assets/libs/network/WebSock"
 import { NetNode, NetNodeOpt, connectCb } from "../../libs/network/NetNode";
 import { INetworkTips } from "../../../extensions/oops-plugin-framework/assets/libs/network/NetInterface";
+import { Logger } from "../../../extensions/oops-plugin-framework/assets/core/common/log/Logger";
 import { NetProtobuf } from "../../libs/network/NetProtobuf";
 import proto from "../../../protos-js/proto.js"
 
@@ -41,6 +42,7 @@ export class NetNodeManager {
     protected _nodeMap : nodeMap = {}           //记录结点
     protected _nodeOptMap : nodeOptMap = {}
     protected _nodeConnOptMap : nodeConnOptMap = {}
+    protected _nodeLoginRspMap : any = {}
 
     //设置结点
     SetNode(opt: Opt) {
@@ -84,7 +86,7 @@ export class NetNodeManager {
                     token: connOpt.token,
                     playerId: connOpt.playerId,
                 })
-        
+                this._nodeLoginRspMap[name] = rsp
                 if(!rsp.isErr) {
                     return true
                 } else {
@@ -125,7 +127,8 @@ export class NetNodeManager {
     TryConnect(name: string, connOpt :connectOpt) {
         let node = this.GetNode(name)
         if (!node) {
-            throw new Error(`TryConnect node not exists name[${name}]`)
+            Logger.logNet(`TryConnect node not exists name[${name}]`)
+            return;
         }
         this._nodeConnOptMap[name] = connOpt
         return node.Connect({
@@ -143,5 +146,10 @@ export class NetNodeManager {
         delete this._nodeMap[name]
         delete this._nodeOptMap[name]
         delete this._nodeConnOptMap[name]
+        delete this._nodeLoginRspMap[name]
+    }
+    //获取登录返回
+    GetLoginRsp(name: string) {
+        return this._nodeLoginRspMap[name]
     }
 }
