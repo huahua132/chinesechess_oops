@@ -25,14 +25,12 @@ let MATCH_STATE = {
 export class HallBllComp extends ecs.Comp {
     //匹配
     IsMatchBtn : boolean = false;        //是否点击了匹配按钮
-    IsJoinGame : boolean = false;        //是否进入游戏
     IsStartMatch : boolean = false;      //是否开始匹配
     MatchingReqing : boolean = false;    //匹配请求中 
     MatchTime : number = 0;              //匹配记时
     MatchState : number = 0;             //匹配状态  0没有匹配  1匹配中  2匹配成功
     reset() {
         this.IsMatchBtn = false;
-        this.IsJoinGame = false;
         this.IsStartMatch = false;
         this.MatchingReqing = false;
         this.MatchTime = 0;
@@ -43,25 +41,20 @@ export class HallBllComp extends ecs.Comp {
 /** 业务逻辑处理对象 */
 @ecs.register('HallSys')
 export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem, ecs.ISystemUpdate {
-    filter(): ecs.IMatcher {
-        return ecs.allOf(HallBllComp, HallModelComp);
-    }
-
-    entityEnter(entity: HallEntity): void {
-        // 注：自定义业务逻辑
+    init() {
+        //系统初始化
         let matchEntity = ecs.getEntity<MatchEntity>(MatchEntity);
-
         oops.message.on(EVENT.MATCH_TIME_OUT, this.onEventHandler, this);
         oops.message.on(EVENT.ACCEPT_MATCH, this.onEventHandler, this);
         oops.message.on(EVENT.CANCEL_MATCH, this.onEventHandler, this);
 
         //收到玩家信息
         smc.net.GetNode("hall").RegPushHandle("hallserver_player", "PlayerInfoNotice", (msgBody: hallserver_player.IPlayerInfoNotice)=> {
-            entity.HallModel.NickName = msgBody.nickname!;
-            entity.HallModel.RankScore = msgBody.rankScore!;
-            console.log("收到玩家信息 >>> ", msgBody, entity.HallView);
-            if (entity.HallView) {
-                entity.HallView.RefreshPlayerInfo();
+            smc.hall.HallModel.NickName = msgBody.nickname!;
+            smc.hall.HallModel.RankScore = msgBody.rankScore!;
+            console.log("收到玩家信息 >>> ", msgBody, smc.hall.HallView);
+            if (smc.hall.HallView) {
+                smc.hall.HallView.RefreshPlayerInfo();
             }
         })
 
@@ -77,8 +70,8 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
 
         //收到通知进入游戏
         smc.net.GetNode("hall").RegPushHandle("hallserver_match", "JoinGameNotice", (msgbody: hallserver_match.IJoinGameNotice)=> {
-            smc.hall.HallBll.IsJoinGame = true;
             console.log("收到通知进入游戏 >>> ", msgbody, smc.hall.HallBll.IsMatchBtn);
+            smc.hall.remove(HallBllComp);
             let opt :connectOpt = {
                 host : msgbody.gamehost!,
                 token : msgbody.gametoken!,
@@ -100,9 +93,20 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
         })
     }
 
+    filter(): ecs.IMatcher {
+        return ecs.allOf(HallBllComp, HallModelComp);
+    }
+
+    entityEnter(entity: HallEntity): void {
+        
+    }
+
     //匹配超时
     onMatchTimeOut(args: any) {
         //再次请求匹配
+        if (!smc.hall.HallBll) {
+            return;
+        }
         if (smc.hall.HallBll.MatchState == MATCH_STATE.MATCHING_SUCC) {
             setTimeout(()=>{
                 smc.hall.HallBll.MatchState = MATCH_STATE.NOT_MATCHING;
@@ -139,7 +143,7 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
     update(entity: HallEntity) {
         //console.log("dt >>> ", this.dt);
         //开始匹配
-        if (entity.HallBll.IsMatchBtn && !entity.HallBll.IsJoinGame) {
+        if (entity.HallBll.IsMatchBtn) {
             entity.HallBll.IsMatchBtn = false;
             if (entity.HallBll.IsStartMatch) {
                 let req = {

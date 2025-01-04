@@ -8,17 +8,23 @@ import { BoardViewComp } from "../view/BoardViewComp";
 import { PosEntity } from "../../pos/PosEntity";
 import { PosViewComp } from "../../pos/view/PosViewComp";
 import { ChessViewComp } from "../../chess/view/ChessViewComp";
+import { HallViewComp } from "../../../hall/hall/view/HallViewComp";
+import {HallBllComp} from "../../../hall/hall/bll/Hall"
+import { OverViewComp } from "../../over/view/OverViewComp";
 import { ChessBllComp } from "../../chess/bll/ChessBll";
 import { ChessEntity } from "../../chess/ChessEntity";
 import {GAME_STATE } from "../../enum/GAME_STATE"
 import { CHESS_TYPE } from "../../enum/CHESS_TYPE";
 import { TEAM_TYPE } from "../../enum/TEAM_TYPE";
+import { EVENT } from "../../../common/enum/EVENT";
 import { UIID } from "../../../common/enum/UIConfig";
+import { OverEntity } from "../../over/OverEntity";
 
 /** 业务输入参数 */
 @ecs.register('BoardBll')
 export class BoardBllComp extends ecs.Comp {
     /** 业务层组件移除时，重置所有数据为默认值 */
+    isOver : boolean = false;            //是否结束
     tableId : string = "";              //桌子ID
     posMap: PosEntity[][] = [];         //棋盘位置映射
     chessList : ChessEntity[] = [];     //棋子列表
@@ -27,6 +33,7 @@ export class BoardBllComp extends ecs.Comp {
 
     touchChess : ChessEntity | null = null;  //拿起的棋子
     addTime : number = 0;               //过去时间
+    overEntity : OverEntity | null = null; //结束界面实例
     reset() {
         this.tableId = "";
         this.posMap = [];
@@ -34,12 +41,68 @@ export class BoardBllComp extends ecs.Comp {
         this.chessMap = {};
         this.touchChess = null;
         this.chessPosMap = {};
+        this.overEntity = null;
+        this.addTime = 0;
+        this.isOver = false;
     }
 }
 
 /** 业务逻辑处理对象 */
 @ecs.register('BoardSys')
 export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem, ecs.ISystemUpdate, ecs.ISystemFirstUpdate {
+    init() {
+        console.log("BoardBllSystem init >>> ", smc.game);
+        oops.message.on(EVENT.RETURN_HHALL, this.onEventHandler, this);
+        let entity = smc.game;
+        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "gameStateRes", (msgBody: chinese_chess_game.IgameStateRes) => {
+            console.log("收到游戏状态 >>> ", msgBody)
+            this.execGameState(entity, msgBody);
+        })
+
+        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "moveRes", (msgBody: chinese_chess_game.ImoveRes) => {
+            console.log("收到游戏移动 >>> ", msgBody)
+            let row = msgBody.moveRow!;
+            let col = msgBody.moveCol!;
+            let chessId = msgBody.chessId!;
+
+            //位置上的棋子
+            let posChessEntity : ChessEntity|null = null;
+            let moveChessEntity = entity.BoardBll.chessMap[chessId];
+            if (entity.BoardBll.chessPosMap[row] && entity.BoardBll.chessPosMap[row][col]) {
+                posChessEntity = entity.BoardBll.chessPosMap[row][col];
+            }
+            //移动棋子
+            let posEntity = entity.BoardBll.posMap[row][col];
+
+            //标记放下棋子
+            if (entity.BoardBll.touchChess) {
+                this.changeChessCanMove(entity.BoardBll.touchChess, false); 
+                entity.BoardBll.touchChess = null;
+                entity.BoardView.hideTouchChess();
+            }
+            //改变移动棋子映射记录
+            entity.BoardBll.chessPosMap[moveChessEntity.ChessBll.row][moveChessEntity.ChessBll.col] = null;
+            moveChessEntity.ChessSys.move(moveChessEntity, posEntity);
+            
+            if (!entity.BoardBll.chessPosMap[row]) {
+                entity.BoardBll.chessPosMap[row] = {};
+            }
+            entity.BoardBll.chessPosMap[row][col] = moveChessEntity;
+
+            if (posChessEntity) {
+                //吃掉棋子
+                posChessEntity.ChessSys.killed(posChessEntity);
+                entity.BoardBll.chessMap[posChessEntity.ChessBll.id] = null;
+            }
+        })
+
+        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "nextDoing", (msgBody: chinese_chess_game.InextDoing) => {
+            console.log("收到接下来谁操作 >>> ", msgBody)
+            entity.BoardBll.addTime = 0;
+            entity.BoardModel.nextDoing = msgBody!;
+        })
+    }
+
     filter(): ecs.IMatcher {
         return ecs.allOf(BoardBllComp, BoardViewComp);
     }
@@ -47,7 +110,7 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
     entityEnter(entity: BoardEntity): void {
         console.log("entityEnter BoardBll >>> ", entity);
         entity.BoardBllSys = this;
-
+        entity.BoardBll.overEntity = ecs.getEntity<OverEntity>(OverEntity);
         let initPos = entity.BoardView.getInitPos();
         let posNode = entity.BoardView.getPosList();
         let x = initPos.x;
@@ -82,52 +145,41 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
             entity.BoardBll.chessList.push(chessEntity);
         }
 
-        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "gameStateRes", (msgBody: chinese_chess_game.IgameStateRes) => {
-            console.log("收到游戏状态 >>> ", msgBody)
-            this.execGameState(entity, msgBody);
+        let loginRsp = smc.net.GetLoginRsp("game");
+        console.log("firstUpdate BoardBll >>> ", entity, loginRsp);
+        let gameNet = smc.net.GetNode("game");
+        gameNet.Req("game_hall", "JoinReq", {tableId : entity.BoardBll.tableId})
+        .then(body => {
+            this.getGameState(entity);
         })
-
-        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "moveRes", (msgBody: chinese_chess_game.ImoveRes) => {
-            console.log("收到游戏移动 >>> ", msgBody)
-            let row = msgBody.moveRow!;
-            let col = msgBody.moveCol!;
-            let chessId = msgBody.chessId!;
-
-            //位置上的棋子
-            let posChessEntity : ChessEntity|null = null;
-            let moveChessEntity = entity.BoardBll.chessMap[chessId];
-            if (entity.BoardBll.chessPosMap[row] && entity.BoardBll.chessPosMap[row][col]) {
-                posChessEntity = entity.BoardBll.chessPosMap[row][col];
-            }
-            //移动棋子
-            let posEntity = entity.BoardBll.posMap[row][col];
-
-            //标记放下棋子
-            if (entity.BoardBll.touchChess) {
-                this.changeChessCanMove(entity.BoardBll.touchChess, false); 
-                entity.BoardBll.touchChess = null;
-                entity.BoardView.hideTouchChess();
-            }
-            
-            moveChessEntity.ChessSys.move(moveChessEntity, posEntity);
-            //改变移动棋子映射记录
-            entity.BoardBll.chessPosMap[moveChessEntity.ChessBll.row][moveChessEntity.ChessBll.col] = null;
-            if (!entity.BoardBll.chessPosMap[row]) {
-                entity.BoardBll.chessPosMap[row] = {};
-            }
-            entity.BoardBll.chessPosMap[row][col] = moveChessEntity;
-
-            if (posChessEntity) {
-                //吃掉棋子
-                posChessEntity.ChessSys.killed(posChessEntity);
-                entity.BoardBll.chessMap[posChessEntity.ChessBll.id] = null;
-            }
+        .catch(body => {
+            oops.gui.toast("进入桌子失败")
+            console.log("进入桌子失败 >>> ", body)
         })
+    }
 
-        smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "nextDoing", (msgBody: chinese_chess_game.InextDoing) => {
-            console.log("收到接下来谁操作 >>> ", msgBody)
-            entity.BoardModel.nextDoing = msgBody!;
-        })
+    async retrunHall() {
+        //删除所有子节点
+        for (let [key, value] of smc.game.children) {
+            smc.game.removeChild(value);
+        }
+        //返回大厅
+        smc.hall.addComponents<ecs.Comp>(HallBllComp);
+        await ModuleUtil.addViewUiAsync(smc.hall, HallViewComp, UIID.Hall);
+        ModuleUtil.removeViewUi(smc.game.BoardBll.overEntity!, OverViewComp, UIID.Over);
+        //销毁over界面实体
+        smc.game.BoardBll.overEntity!.destroy();
+        ModuleUtil.removeViewUi(smc.game, BoardViewComp, UIID.Board);
+        //卸载业务模块
+        smc.game.remove(BoardBllComp);
+        smc.game.BoardModel.reset();
+    }
+
+    onEventHandler(event: string, args: any) {
+        switch (event) {
+            case EVENT.RETURN_HHALL:
+                return this.retrunHall();
+        }
     }
 
     //获取棋子的可以的移动位置
@@ -232,6 +284,7 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
             }
         }
         entity.BoardModel.nextDoing = msgBody.nextDoing!;
+        entity.BoardModel.winPlayerId = msgBody.winPlayerId!;
 
         entity.BoardView.showPlayerInfo();
 
@@ -242,7 +295,10 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
         for (let i = 0; i < chessList.length; i++) {
             let chess = chessList[i];
             let chessEntity = entity.BoardBll.chessList[i];
-            chessEntity.addComponents<ecs.Comp>(ChessBllComp);
+            if (!chessEntity.has(ChessBllComp)) {
+                chessEntity.addComponents<ecs.Comp>(ChessBllComp);
+            }
+            
             chessEntity.ChessBll.chessType = chess.chessType!;
             if (chess.chessType! > CHESS_TYPE.BLACK_Z) {
                 chessEntity.ChessBll.teamType = TEAM_TYPE.RED;
@@ -284,26 +340,31 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
     }
 
     firstUpdate(entity: BoardEntity): void {
-        let loginRsp = smc.net.GetLoginRsp("game");
-        console.log("firstUpdate BoardBll >>> ", entity, loginRsp);
-        let gameNet = smc.net.GetNode("game");
-        gameNet.Req("game_hall", "JoinReq", {tableId : entity.BoardBll.tableId})
-        .then(body => {
-            this.getGameState(entity);
-        })
-        .catch(body => {
-            oops.gui.toast("进入桌子失败")
-            console.log("进入桌子失败 >>> ", body)
-        })
+        //这里只会执行一次
     }
 
     update(entity: BoardEntity) {
+        if (entity.BoardBll.isOver) {
+            return;
+        }
         if (entity.BoardModel.state == GAME_STATE.playing) {
             entity.BoardBll.addTime += this.dt;
             if (entity.BoardModel.nextDoing.playerId == entity.BoardModel.selfPlayer!.playerId) {
                 entity.BoardView.showSelfRemainTime();
             } else {
                 entity.BoardView.showRivalRemainTime();
+            }
+        } else if (entity.BoardModel.state == GAME_STATE.over) {
+            entity.BoardBll.isOver = true;
+            //关闭游戏服连接
+            smc.net.GetNode("game").Close();
+            if (entity.BoardBll.overEntity) {
+                if (entity.BoardModel.winPlayerId == entity.BoardModel.selfPlayer!.playerId) {
+                    entity.BoardBll.overEntity.OverBll.isWin = true;
+                } else {
+                    entity.BoardBll.overEntity.OverBll.isWin = false;
+                }
+                ModuleUtil.addViewUi(entity.BoardBll.overEntity!, OverViewComp, UIID.Over);
             }
         }
     }

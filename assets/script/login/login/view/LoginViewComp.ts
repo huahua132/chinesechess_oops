@@ -8,6 +8,7 @@ import { smc } from "../../../common/SingletonModuleComp"
 import { ModuleUtil } from "../../../../../extensions/oops-plugin-framework/assets/module/common/ModuleUtil";
 import { UIID } from "../../../common/enum/UIConfig"
 import {HallViewComp} from "../../../hall/hall/view/HallViewComp"
+import {HallBllComp} from "../../../hall/hall/bll/Hall"
 
 const {ccclass, property} = _decorator
 
@@ -95,6 +96,7 @@ export class LoginViewComp extends CCVMParentComp {
                         authSuccCb : async ()=> {
                             console.log("登录大厅服成功 !!!>>>>>>>>>>>>", smc.hall)
                             smc.hall.HallModel.PlayerId = playerId;
+                            smc.hall.addComponents<ecs.Comp>(HallBllComp);
                             await ModuleUtil.addViewUiAsync(smc.hall, HallViewComp, UIID.Hall);
                             ModuleUtil.removeViewUi(this.ent, LoginViewComp, UIID.Login);
                         }

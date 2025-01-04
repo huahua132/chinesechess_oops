@@ -33,7 +33,7 @@ export class ChessBllComp extends ecs.Comp {
 
 /** 业务逻辑处理对象 */
 @ecs.register('ChessSys')
-export class ChessBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem {
+export class ChessBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem, ecs.IEntityRemoveSystem {
     filter(): ecs.IMatcher {
         return ecs.allOf(ChessBllComp, ChessViewComp);
     }
@@ -41,11 +41,15 @@ export class ChessBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
     entityEnter(entity: ChessEntity): void {
         entity.ChessSys = this;
         let boardEntity = entity.parent as BoardEntity;
-        console.log("entityEnter >>>", entity, boardEntity);
+        console.log("chess entityEnter >>>", entity, boardEntity);
         if (entity.ChessBll.row > 0 && entity.ChessBll.col > 0) {
             this.setPos(entity, boardEntity.BoardBll.posMap[entity.ChessBll.row][entity.ChessBll.col]);
         }
     }
+
+    entityRemove(entity: ChessEntity): void {
+        console.log("chess entityRemove >>>", entity);
+    }  
 
     setPos(entity: ChessEntity, posEntity: PosEntity) {
         entity.ChessView.setPos(posEntity);

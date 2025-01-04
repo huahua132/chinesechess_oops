@@ -17,6 +17,6 @@ export class HallEntity extends ecs.Entity {
 
     /** 初始添加的数据层组件 */
     protected init() {
-        this.addComponents<ecs.Comp>(HallModelComp, HallBllComp);
+        this.addComponents<ecs.Comp>(HallModelComp);
     }
 }

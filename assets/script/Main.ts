@@ -27,6 +27,14 @@ export class Main extends Root {
     }
 
     protected run() {
+        
+    }
+
+    protected initGui() {
+        oops.gui.init(UIConfigData);
+    }
+
+    protected initEcsSystem() {
         //大厅网络
         let opt :Opt = {
             name : "hall",
@@ -40,14 +48,9 @@ export class Main extends Root {
             protoPacks : PACKS.game,
         }
         smc.net.SetNode(gameopt)
-
         smc.initialize = ecs.getEntity<Initialize>(Initialize);
         smc.account = ecs.getEntity<Account>(Account);
         smc.hall = ecs.getEntity<HallEntity>(HallEntity);
         smc.game = ecs.getEntity<BoardEntity>(BoardEntity);
-    }
-
-    protected initGui() {
-        oops.gui.init(UIConfigData);
     }
 }

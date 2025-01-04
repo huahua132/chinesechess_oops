@@ -14,12 +14,16 @@ export class PosBllComp extends ecs.Comp {
 
 /** 业务逻辑处理对象 */
 @ecs.register('PosSys')
-export class PosBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem {
+export class PosBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSystem, ecs.IEntityRemoveSystem {
     filter(): ecs.IMatcher {
         return ecs.allOf(PosBllComp);
     }
 
     entityEnter(e: ecs.Entity): void {
+        console.log("PosBllSystem entityEnter >>>", e);
+    }
 
+    entityRemove(e: ecs.Entity): void {
+        console.log("PosBllSystem entityRemove >>>", e);
     }
 }

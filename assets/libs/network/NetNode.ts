@@ -116,6 +116,7 @@ export class NetNode {
     protected _reconnectTimer : any;                                        // 重连定时器
     protected _heartTimer : any;                                            // 心跳定时器
     protected _heartTimeOutTimer : any;                                     // 心跳超时定时器
+    protected _isActClose : boolean = false;                                // 是否主动关闭
 
     protected isAutoReconnect() {
         if (this._autoReconnect == -1 || this._tryReconnectTimes < this._autoReconnect) {
@@ -410,10 +411,18 @@ export class NetNode {
         if (this._isAuthFail) {
             return;
         }
+        //主动关闭不重连
+        if (this._isActClose) {
+            return;
+        }
         //尝试重连
         if (this.isAutoReconnect()) {
             this.updateNetTips(NetTipsType.ReConnecting, true);
             this._reconnectTimer = setTimeout(() => {
+                //主动关闭不重连
+                if (this._isActClose) {
+                    return;
+                }
                 this._socket?.close();
                 this.Connect(this._connectOptions!);
                 this._tryReconnectTimes += 1;
@@ -461,6 +470,7 @@ export class NetNode {
     //请求建立连接
     Connect(options: NetConnectOptions) :boolean {
         if (this._socket && this._state == NetNodeState.Closed) {
+            this._isActClose = false;
             this._state = NetNodeState.Connecting;
             if (!this._socket.connect(options)) {
                 this.updateNetTips(NetTipsType.Connecting, false);
@@ -540,6 +550,7 @@ export class NetNode {
     }
     //关闭
     Close() {
+        this._isActClose = true;
         if (this._networkTips) {
             this._networkTips.connectTips(false);
             this._networkTips.reconnectTips(false);
