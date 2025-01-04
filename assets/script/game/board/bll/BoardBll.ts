@@ -101,6 +101,14 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
             }
             //移动棋子
             let posEntity = entity.BoardBll.posMap[row][col];
+
+            //标记放下棋子
+            if (entity.BoardBll.touchChess) {
+                this.changeChessCanMove(entity.BoardBll.touchChess, false); 
+                entity.BoardBll.touchChess = null;
+                entity.BoardView.hideTouchChess();
+            }
+            
             moveChessEntity.ChessSys.move(moveChessEntity, posEntity);
             //改变移动棋子映射记录
             entity.BoardBll.chessPosMap[moveChessEntity.ChessBll.row][moveChessEntity.ChessBll.col] = null;
@@ -118,6 +126,7 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
 
         smc.net.GetNode("game").RegPushHandle("chinese_chess_game", "nextDoing", (msgBody: chinese_chess_game.InextDoing) => {
             console.log("收到接下来谁操作 >>> ", msgBody)
+            entity.BoardModel.nextDoing = msgBody!;
         })
     }
 
@@ -187,7 +196,14 @@ export class BoardBllSystem extends ecs.ComblockSystem implements ecs.IEntityEnt
         if (chessBll.isSelf) {
             if (boardEntity.BoardBll.touchChess) {
                //放下棋子
-                this.changeChessCanMove(boardEntity.BoardBll.touchChess, false); 
+                this.changeChessCanMove(boardEntity.BoardBll.touchChess, false);
+            }
+            
+            if (boardEntity.BoardBll.touchChess == entity) {
+                //放下棋子
+                boardEntity.BoardBll.touchChess = null;
+                boardEntity.BoardView.hideTouchChess();
+                return;
             }
             //拿起棋子
             boardEntity.BoardBll.touchChess = entity;

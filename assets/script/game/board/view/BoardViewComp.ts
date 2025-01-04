@@ -1,4 +1,4 @@
-import { _decorator, Label, Quat } from "cc";
+import { _decorator, Label, Quat, Vec3 } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import { BoardEntity } from "../BoardEntity"
@@ -69,6 +69,13 @@ export class BoardViewComp extends CCComp {
         let optBox = this.getNode("optBox");
         optBox!.active = true;
         optBox!.setPosition(chessNode.getPosition());
+        
+        const entity = this.ent as BoardEntity;
+        if (entity.BoardModel.selfPlayer!.teamType === TEAM_TYPE.BLACK) {
+            optBox!.setPosition(new Vec3(chessNode.x + chessEntity.ChessBll.offSetX, chessNode.y + chessEntity.ChessBll.offSetY, 0));
+        } else {
+            optBox!.setPosition(new Vec3(chessNode.x - chessEntity.ChessBll.offSetX, chessNode.y - chessEntity.ChessBll.offSetY, 0));
+        }
     }
 
     //隐藏拿起棋子
