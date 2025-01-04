@@ -59,7 +59,7 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
         smc.net.GetNode("hall").RegPushHandle("hallserver_player", "PlayerInfoNotice", (msgBody: hallserver_player.IPlayerInfoNotice)=> {
             entity.HallModel.NickName = msgBody.nickname!;
             entity.HallModel.RankScore = msgBody.rankScore!;
-
+            console.log("收到玩家信息 >>> ", msgBody, entity.HallView);
             if (entity.HallView) {
                 entity.HallView.RefreshPlayerInfo();
             }

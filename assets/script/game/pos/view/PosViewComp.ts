@@ -2,6 +2,7 @@ import { _decorator } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import { PosEntity } from "../PosEntity"
+import { BoardEntity } from "../../board/BoardEntity";
 
 const { ccclass, property } = _decorator;
 
@@ -30,7 +31,9 @@ export class PosViewComp extends CCComp {
     }
 
     btnMove() {
-        console.log("btnMove >>> ");
+        const entity = this.ent as PosEntity;         // ecs.Entity 可转为当前模块的具体实体对象
+        let boardEntity = entity.parent as BoardEntity;
+        boardEntity.BoardBllSys.optPos(entity);
     }
 
     /** 视图对象通过 ecs.Entity.remove(PosViewComp) 删除组件是触发组件处理自定义释放逻辑 */

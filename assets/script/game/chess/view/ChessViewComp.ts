@@ -1,4 +1,4 @@
-import { _decorator, Sprite, tween, Vec3, SpriteFrame, Quat } from "cc";
+import { _decorator, Sprite, tween, Vec3, SpriteFrame, Quat, Node } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import { ChessEntity } from "../ChessEntity";
@@ -37,6 +37,7 @@ export class ChessViewComp extends CCComp {
         const entity = this.ent as ChessEntity;
         entity.ChessView = this;
         this.setButton();
+        this.hide();
     }
 
     hide() {
@@ -54,7 +55,7 @@ export class ChessViewComp extends CCComp {
         this.node.active = true;
 
         const boardEntity = entity.parent as BoardEntity;
-        if (boardEntity.BoardModel.selfPlayer.teamType === TEAM_TYPE.BLACK) {
+        if (boardEntity.BoardModel.selfPlayer!.teamType === TEAM_TYPE.BLACK) {
             //棋子旋转180度
             let rotationQuat = new Quat();
             Quat.fromEuler(rotationQuat, 180, 180, 0);
@@ -63,6 +64,7 @@ export class ChessViewComp extends CCComp {
         } else {
             this.node.setPosition(new Vec3(posNode.x + entity.ChessBll.offSetX, posNode.y + entity.ChessBll.offSetY, 0));
         }
+        this.node.active = true;
     }
 
     move(posEntity : PosEntity) {
@@ -71,7 +73,7 @@ export class ChessViewComp extends CCComp {
         let offsetx = entity.ChessBll.offSetX;
         let offsety = entity.ChessBll.offSetY;
         const boardEntity = entity.parent as BoardEntity;
-        if (boardEntity.BoardModel.selfPlayer.teamType === TEAM_TYPE.BLACK) {
+        if (boardEntity.BoardModel.selfPlayer!.teamType === TEAM_TYPE.BLACK) {
             offsetx = -offsetx;
             offsety = -offsety;
         }
@@ -82,9 +84,10 @@ export class ChessViewComp extends CCComp {
     }
 
     //点击棋子
-    optBtn(event : any) {
+    optBtn() {
         const entity = this.ent as ChessEntity;
-        console.log("optBtn >>> ", event, entity);
+        const boardEntity = entity.parent as BoardEntity;
+        boardEntity.BoardBllSys.optChess(entity);
     }
 
     reset() {

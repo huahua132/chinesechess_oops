@@ -14,7 +14,5 @@ export class ChessEntity extends ecs.Entity {
     ChessSys!: ChessBllSystem;
 
     /** 初始添加的数据层组件 */
-    protected init() {
-        this.addComponents<ecs.Comp>(ChessBllComp);
-    }
+    protected init() {}
 }

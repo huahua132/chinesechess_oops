@@ -2,6 +2,7 @@ import { _decorator, Label, Quat } from "cc";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import { BoardEntity } from "../BoardEntity"
+import { ChessEntity } from "../../chess/ChessEntity";
 import { TEAM_TYPE } from "../../enum/TEAM_TYPE";
 
 const { ccclass, property } = _decorator;
@@ -31,28 +32,49 @@ export class BoardViewComp extends CCComp {
         return this.getNode("posList")!;
     }
 
+    // 获取棋子列表结点
+    getChessList() {
+        return this.getNode("chessList")!;
+    }
+
     // 显示玩家信息
     showPlayerInfo() {
         const entity = this.ent as BoardEntity;
         let selfNode = this.getNode("selfPlayer");
         let otherNode = this.getNode("otherPlayer");
-        selfNode!.getChildByName("nickname")!.getComponent(Label)!.string = entity.BoardModel.selfPlayer.nickname!;
-        selfNode!.getChildByName("rank")!.getComponent(Label)!.string = entity.BoardModel.selfPlayer.score!.toString();
+        selfNode!.getChildByName("nickname")!.getComponent(Label)!.string = entity.BoardModel.selfPlayer!.nickname!;
+        selfNode!.getChildByName("rank")!.getComponent(Label)!.string = entity.BoardModel.selfPlayer!.score!.toString();
         selfNode!.getChildByName("remainTotalTime")!.getComponent(Label)!.string = "600";
         selfNode!.getChildByName("remainOnceTime")!.getComponent(Label)!.string = "60";
+        console.log("showPlayerInfo ", entity.BoardModel.rivalPlayer);
+        if (entity.BoardModel.rivalPlayer) {
+            otherNode!.getChildByName("nickname")!.getComponent(Label)!.string = entity.BoardModel.rivalPlayer.nickname!;
+            otherNode!.getChildByName("rank")!.getComponent(Label)!.string = entity.BoardModel.rivalPlayer.score!.toString();
+            otherNode!.getChildByName("remainTotalTime")!.getComponent(Label)!.string = "600";
+            otherNode!.getChildByName("remainOnceTime")!.getComponent(Label)!.string = "60";
+        }
 
-        otherNode!.getChildByName("nickname")!.getComponent(Label)!.string = entity.BoardModel.rivalPlayer.nickname!;
-        otherNode!.getChildByName("rank")!.getComponent(Label)!.string = entity.BoardModel.rivalPlayer.score!.toString();
-        otherNode!.getChildByName("remainTotalTime")!.getComponent(Label)!.string = "600";
-        otherNode!.getChildByName("remainOnceTime")!.getComponent(Label)!.string = "60";
-
-        if (entity.BoardModel.selfPlayer.teamType === TEAM_TYPE.BLACK) {
+        if (entity.BoardModel.selfPlayer!.teamType === TEAM_TYPE.BLACK) {
             //棋盘旋转180度
             let rotationQuat = new Quat();
             let mapNode = this.getNode("map");
             Quat.fromEuler(rotationQuat, 180, 180, 0);
             mapNode!.rotation = rotationQuat;
         }
+    }
+
+    //显示拿起棋子
+    showTouchChess(chessEntity: ChessEntity) {
+        let chessNode = chessEntity.ChessView.node;
+        let optBox = this.getNode("optBox");
+        optBox!.active = true;
+        optBox!.setPosition(chessNode.getPosition());
+    }
+
+    //隐藏拿起棋子
+    hideTouchChess() {
+        let optBox = this.getNode("optBox");
+        optBox!.active = false;
     }
 
     showSelfRemainTime() {
