@@ -17,6 +17,8 @@ import { Initialize } from './login/initialize/Initialize';
 import {PACKS} from "./common/enum/PACK"
 import {Opt} from "../libs/network/NetNodeManager"
 import {BoardEntity} from "./game/board/BoardEntity"
+import { StorageSecuritySimple } from "../../extensions/oops-plugin-framework/assets/core/common/storage/StorageSecuritySimple"
+import {EmailEntity} from "./hall/email/EmailEntity"
 
 const { ccclass, property } = _decorator;
 
@@ -30,11 +32,19 @@ export class Main extends Root {
         
     }
 
+    protected iniStart() {
+        
+        console.log("iniStart")
+    }
+
     protected initGui() {
+        console.log("initGui")
         oops.gui.init(UIConfigData);
     }
 
     protected initEcsSystem() {
+        console.log("initEcsSystem")
+        oops.storage.init(new StorageSecuritySimple());
         //大厅网络
         let opt :Opt = {
             name : "hall",
@@ -52,5 +62,6 @@ export class Main extends Root {
         smc.account = ecs.getEntity<Account>(Account);
         smc.hall = ecs.getEntity<HallEntity>(HallEntity);
         smc.game = ecs.getEntity<BoardEntity>(BoardEntity);
+        smc.email = ecs.getEntity<EmailEntity>(EmailEntity);
     }
 }

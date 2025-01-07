@@ -4,6 +4,7 @@ import { Initialize } from "../login/initialize/Initialize";
 import { NetNodeManager } from "../../libs/network/NetNodeManager";
 import {HallEntity} from "../hall/hall/Hall"
 import {BoardEntity} from "../game/board/BoardEntity"
+import {EmailEntity} from "../hall/email/EmailEntity"
 
 /** 游戏单例业务模块 */
 @ecs.register('SingletonModule')
@@ -18,6 +19,8 @@ export class SingletonModuleComp extends ecs.Comp {
     hall: HallEntity = null!;
     /** 游戏模块 */
     game: BoardEntity = null!;
+    /** 邮件模块 */
+    email: EmailEntity = null!;
     reset() { }
 }
 

@@ -18,6 +18,8 @@ export enum UIID {
     Board,
     /** 游戏结束界面 */
     Over,
+    /** 邮件界面 */
+    Email,
 }
 
 /** 打开界面方式的配置数据 */
@@ -30,4 +32,5 @@ export const UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Match] : {layer: LayerType.PopUp, prefab: "gui/hall/match"},
     [UIID.Board] : {layer: LayerType.UI, prefab: "gui/game/board"},
     [UIID.Over] : {layer: LayerType.PopUp, prefab: "gui/game/over"},
+    [UIID.Email] : {layer: LayerType.UI, prefab: "gui/hall/email"},
 }

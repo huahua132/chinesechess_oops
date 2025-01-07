@@ -4,6 +4,11 @@ import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCComp } from "db://oops-framework/module/common/CCComp";
 import {HallEntity} from "../Hall"
 import {oops} from "db://oops-framework/core/Oops"
+import { ModuleUtil } from "../../../../../extensions/oops-plugin-framework/assets/module/common/ModuleUtil";
+import { EmailViewComp } from "../../email/view/EmailViewComp";
+import { smc } from "../../../common/SingletonModuleComp";
+import {UIID} from "../../../common/enum/UIConfig";
+import {EmailBllComp} from "../../email/bll/EmailBll"
 
 const { ccclass, property } = _decorator;
 
@@ -55,6 +60,8 @@ export class HallViewComp extends CCComp {
     //邮件
     emailBtn() {
         console.log("emailBtn >>> ")
+        smc.email.addComponents<ecs.Comp>(EmailBllComp);
+        ModuleUtil.addViewUi(smc.email, EmailViewComp, UIID.Email);
     }
 
     //匹配按钮
