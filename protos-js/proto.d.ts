@@ -1065,6 +1065,8 @@ export namespace hallserver_player {
 
     /** sub enum. */
     enum sub {
+        ReqChangeNickName = 1,
+        ResChangeNickName = 2,
         PlayerInfoNotice = 80,
         PlayerInfoSynNotice = 81
     }
@@ -1077,6 +1079,15 @@ export namespace hallserver_player {
 
         /** PlayerInfoNotice rankScore */
         rankScore?: (number|null);
+
+        /** PlayerInfoNotice level */
+        level?: (number|null);
+
+        /** PlayerInfoNotice headFrameId */
+        headFrameId?: (number|null);
+
+        /** PlayerInfoNotice headId */
+        headId?: (number|null);
     }
 
     /** Represents a PlayerInfoNotice. */
@@ -1093,6 +1104,15 @@ export namespace hallserver_player {
 
         /** PlayerInfoNotice rankScore. */
         public rankScore: number;
+
+        /** PlayerInfoNotice level. */
+        public level: number;
+
+        /** PlayerInfoNotice headFrameId. */
+        public headFrameId: number;
+
+        /** PlayerInfoNotice headId. */
+        public headId: number;
 
         /**
          * Creates a new PlayerInfoNotice instance using the specified properties.
@@ -1290,6 +1310,9 @@ export namespace hallserver_player {
     /** Properties of a PlayerInfoSynNotice. */
     interface IPlayerInfoSynNotice {
 
+        /** PlayerInfoSynNotice playerId */
+        playerId?: (number|Long|null);
+
         /** PlayerInfoSynNotice synList */
         synList?: (hallserver_player.IoneSynInfo[]|null);
     }
@@ -1302,6 +1325,9 @@ export namespace hallserver_player {
          * @param [properties] Properties to set
          */
         constructor(properties?: hallserver_player.IPlayerInfoSynNotice);
+
+        /** PlayerInfoSynNotice playerId. */
+        public playerId: (number|Long);
 
         /** PlayerInfoSynNotice synList. */
         public synList: hallserver_player.IoneSynInfo[];
@@ -1378,6 +1404,200 @@ export namespace hallserver_player {
 
         /**
          * Gets the default type url for PlayerInfoSynNotice
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
+    }
+
+    /** Properties of a ReqChangeNickName. */
+    interface IReqChangeNickName {
+
+        /** ReqChangeNickName nickname */
+        nickname?: (string|null);
+    }
+
+    /** Represents a ReqChangeNickName. */
+    class ReqChangeNickName implements IReqChangeNickName {
+
+        /**
+         * Constructs a new ReqChangeNickName.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: hallserver_player.IReqChangeNickName);
+
+        /** ReqChangeNickName nickname. */
+        public nickname: string;
+
+        /**
+         * Creates a new ReqChangeNickName instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns ReqChangeNickName instance
+         */
+        public static create(properties?: hallserver_player.IReqChangeNickName): hallserver_player.ReqChangeNickName;
+
+        /**
+         * Encodes the specified ReqChangeNickName message. Does not implicitly {@link hallserver_player.ReqChangeNickName.verify|verify} messages.
+         * @param message ReqChangeNickName message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: hallserver_player.IReqChangeNickName, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified ReqChangeNickName message, length delimited. Does not implicitly {@link hallserver_player.ReqChangeNickName.verify|verify} messages.
+         * @param message ReqChangeNickName message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: hallserver_player.IReqChangeNickName, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a ReqChangeNickName message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns ReqChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): hallserver_player.ReqChangeNickName;
+
+        /**
+         * Decodes a ReqChangeNickName message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns ReqChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): hallserver_player.ReqChangeNickName;
+
+        /**
+         * Verifies a ReqChangeNickName message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a ReqChangeNickName message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns ReqChangeNickName
+         */
+        public static fromObject(object: { [k: string]: any }): hallserver_player.ReqChangeNickName;
+
+        /**
+         * Creates a plain object from a ReqChangeNickName message. Also converts values to other types if specified.
+         * @param message ReqChangeNickName
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: hallserver_player.ReqChangeNickName, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this ReqChangeNickName to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for ReqChangeNickName
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
+    }
+
+    /** Properties of a ResChangeNickName. */
+    interface IResChangeNickName {
+
+        /** ResChangeNickName nickname */
+        nickname?: (string|null);
+    }
+
+    /** Represents a ResChangeNickName. */
+    class ResChangeNickName implements IResChangeNickName {
+
+        /**
+         * Constructs a new ResChangeNickName.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: hallserver_player.IResChangeNickName);
+
+        /** ResChangeNickName nickname. */
+        public nickname: string;
+
+        /**
+         * Creates a new ResChangeNickName instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns ResChangeNickName instance
+         */
+        public static create(properties?: hallserver_player.IResChangeNickName): hallserver_player.ResChangeNickName;
+
+        /**
+         * Encodes the specified ResChangeNickName message. Does not implicitly {@link hallserver_player.ResChangeNickName.verify|verify} messages.
+         * @param message ResChangeNickName message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: hallserver_player.IResChangeNickName, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified ResChangeNickName message, length delimited. Does not implicitly {@link hallserver_player.ResChangeNickName.verify|verify} messages.
+         * @param message ResChangeNickName message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: hallserver_player.IResChangeNickName, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a ResChangeNickName message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns ResChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): hallserver_player.ResChangeNickName;
+
+        /**
+         * Decodes a ResChangeNickName message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns ResChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): hallserver_player.ResChangeNickName;
+
+        /**
+         * Verifies a ResChangeNickName message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a ResChangeNickName message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns ResChangeNickName
+         */
+        public static fromObject(object: { [k: string]: any }): hallserver_player.ResChangeNickName;
+
+        /**
+         * Creates a plain object from a ResChangeNickName message. Also converts values to other types if specified.
+         * @param message ResChangeNickName
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: hallserver_player.ResChangeNickName, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this ResChangeNickName to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for ResChangeNickName
          * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns The default type url
          */

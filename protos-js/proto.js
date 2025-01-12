@@ -2694,11 +2694,15 @@ $root.hallserver_player = (function() {
      * sub enum.
      * @name hallserver_player.sub
      * @enum {number}
+     * @property {number} ReqChangeNickName=1 ReqChangeNickName value
+     * @property {number} ResChangeNickName=2 ResChangeNickName value
      * @property {number} PlayerInfoNotice=80 PlayerInfoNotice value
      * @property {number} PlayerInfoSynNotice=81 PlayerInfoSynNotice value
      */
     hallserver_player.sub = (function() {
         var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[1] = "ReqChangeNickName"] = 1;
+        values[valuesById[2] = "ResChangeNickName"] = 2;
         values[valuesById[80] = "PlayerInfoNotice"] = 80;
         values[valuesById[81] = "PlayerInfoSynNotice"] = 81;
         return values;
@@ -2712,6 +2716,9 @@ $root.hallserver_player = (function() {
          * @interface IPlayerInfoNotice
          * @property {string|null} [nickname] PlayerInfoNotice nickname
          * @property {number|null} [rankScore] PlayerInfoNotice rankScore
+         * @property {number|null} [level] PlayerInfoNotice level
+         * @property {number|null} [headFrameId] PlayerInfoNotice headFrameId
+         * @property {number|null} [headId] PlayerInfoNotice headId
          */
 
         /**
@@ -2746,6 +2753,30 @@ $root.hallserver_player = (function() {
         PlayerInfoNotice.prototype.rankScore = 0;
 
         /**
+         * PlayerInfoNotice level.
+         * @member {number} level
+         * @memberof hallserver_player.PlayerInfoNotice
+         * @instance
+         */
+        PlayerInfoNotice.prototype.level = 0;
+
+        /**
+         * PlayerInfoNotice headFrameId.
+         * @member {number} headFrameId
+         * @memberof hallserver_player.PlayerInfoNotice
+         * @instance
+         */
+        PlayerInfoNotice.prototype.headFrameId = 0;
+
+        /**
+         * PlayerInfoNotice headId.
+         * @member {number} headId
+         * @memberof hallserver_player.PlayerInfoNotice
+         * @instance
+         */
+        PlayerInfoNotice.prototype.headId = 0;
+
+        /**
          * Creates a new PlayerInfoNotice instance using the specified properties.
          * @function create
          * @memberof hallserver_player.PlayerInfoNotice
@@ -2773,6 +2804,12 @@ $root.hallserver_player = (function() {
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.nickname);
             if (message.rankScore != null && Object.hasOwnProperty.call(message, "rankScore"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.rankScore);
+            if (message.level != null && Object.hasOwnProperty.call(message, "level"))
+                writer.uint32(/* id 3, wireType 0 =*/24).int32(message.level);
+            if (message.headFrameId != null && Object.hasOwnProperty.call(message, "headFrameId"))
+                writer.uint32(/* id 4, wireType 0 =*/32).int32(message.headFrameId);
+            if (message.headId != null && Object.hasOwnProperty.call(message, "headId"))
+                writer.uint32(/* id 5, wireType 0 =*/40).int32(message.headId);
             return writer;
         };
 
@@ -2813,6 +2850,18 @@ $root.hallserver_player = (function() {
                     }
                 case 2: {
                         message.rankScore = reader.int32();
+                        break;
+                    }
+                case 3: {
+                        message.level = reader.int32();
+                        break;
+                    }
+                case 4: {
+                        message.headFrameId = reader.int32();
+                        break;
+                    }
+                case 5: {
+                        message.headId = reader.int32();
                         break;
                     }
                 default:
@@ -2856,6 +2905,15 @@ $root.hallserver_player = (function() {
             if (message.rankScore != null && message.hasOwnProperty("rankScore"))
                 if (!$util.isInteger(message.rankScore))
                     return "rankScore: integer expected";
+            if (message.level != null && message.hasOwnProperty("level"))
+                if (!$util.isInteger(message.level))
+                    return "level: integer expected";
+            if (message.headFrameId != null && message.hasOwnProperty("headFrameId"))
+                if (!$util.isInteger(message.headFrameId))
+                    return "headFrameId: integer expected";
+            if (message.headId != null && message.hasOwnProperty("headId"))
+                if (!$util.isInteger(message.headId))
+                    return "headId: integer expected";
             return null;
         };
 
@@ -2875,6 +2933,12 @@ $root.hallserver_player = (function() {
                 message.nickname = String(object.nickname);
             if (object.rankScore != null)
                 message.rankScore = object.rankScore | 0;
+            if (object.level != null)
+                message.level = object.level | 0;
+            if (object.headFrameId != null)
+                message.headFrameId = object.headFrameId | 0;
+            if (object.headId != null)
+                message.headId = object.headId | 0;
             return message;
         };
 
@@ -2894,11 +2958,20 @@ $root.hallserver_player = (function() {
             if (options.defaults) {
                 object.nickname = "";
                 object.rankScore = 0;
+                object.level = 0;
+                object.headFrameId = 0;
+                object.headId = 0;
             }
             if (message.nickname != null && message.hasOwnProperty("nickname"))
                 object.nickname = message.nickname;
             if (message.rankScore != null && message.hasOwnProperty("rankScore"))
                 object.rankScore = message.rankScore;
+            if (message.level != null && message.hasOwnProperty("level"))
+                object.level = message.level;
+            if (message.headFrameId != null && message.hasOwnProperty("headFrameId"))
+                object.headFrameId = message.headFrameId;
+            if (message.headId != null && message.hasOwnProperty("headId"))
+                object.headId = message.headId;
             return object;
         };
 
@@ -3224,6 +3297,7 @@ $root.hallserver_player = (function() {
          * Properties of a PlayerInfoSynNotice.
          * @memberof hallserver_player
          * @interface IPlayerInfoSynNotice
+         * @property {number|Long|null} [playerId] PlayerInfoSynNotice playerId
          * @property {Array.<hallserver_player.IoneSynInfo>|null} [synList] PlayerInfoSynNotice synList
          */
 
@@ -3242,6 +3316,14 @@ $root.hallserver_player = (function() {
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
+
+        /**
+         * PlayerInfoSynNotice playerId.
+         * @member {number|Long} playerId
+         * @memberof hallserver_player.PlayerInfoSynNotice
+         * @instance
+         */
+        PlayerInfoSynNotice.prototype.playerId = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
         /**
          * PlayerInfoSynNotice synList.
@@ -3275,9 +3357,11 @@ $root.hallserver_player = (function() {
         PlayerInfoSynNotice.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
+            if (message.playerId != null && Object.hasOwnProperty.call(message, "playerId"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int64(message.playerId);
             if (message.synList != null && message.synList.length)
                 for (var i = 0; i < message.synList.length; ++i)
-                    $root.hallserver_player.oneSynInfo.encode(message.synList[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                    $root.hallserver_player.oneSynInfo.encode(message.synList[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             return writer;
         };
 
@@ -3313,6 +3397,10 @@ $root.hallserver_player = (function() {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
+                        message.playerId = reader.int64();
+                        break;
+                    }
+                case 2: {
                         if (!(message.synList && message.synList.length))
                             message.synList = [];
                         message.synList.push($root.hallserver_player.oneSynInfo.decode(reader, reader.uint32()));
@@ -3353,6 +3441,9 @@ $root.hallserver_player = (function() {
         PlayerInfoSynNotice.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
+            if (message.playerId != null && message.hasOwnProperty("playerId"))
+                if (!$util.isInteger(message.playerId) && !(message.playerId && $util.isInteger(message.playerId.low) && $util.isInteger(message.playerId.high)))
+                    return "playerId: integer|Long expected";
             if (message.synList != null && message.hasOwnProperty("synList")) {
                 if (!Array.isArray(message.synList))
                     return "synList: array expected";
@@ -3377,6 +3468,15 @@ $root.hallserver_player = (function() {
             if (object instanceof $root.hallserver_player.PlayerInfoSynNotice)
                 return object;
             var message = new $root.hallserver_player.PlayerInfoSynNotice();
+            if (object.playerId != null)
+                if ($util.Long)
+                    (message.playerId = $util.Long.fromValue(object.playerId)).unsigned = false;
+                else if (typeof object.playerId === "string")
+                    message.playerId = parseInt(object.playerId, 10);
+                else if (typeof object.playerId === "number")
+                    message.playerId = object.playerId;
+                else if (typeof object.playerId === "object")
+                    message.playerId = new $util.LongBits(object.playerId.low >>> 0, object.playerId.high >>> 0).toNumber();
             if (object.synList) {
                 if (!Array.isArray(object.synList))
                     throw TypeError(".hallserver_player.PlayerInfoSynNotice.synList: array expected");
@@ -3405,6 +3505,17 @@ $root.hallserver_player = (function() {
             var object = {};
             if (options.arrays || options.defaults)
                 object.synList = [];
+            if (options.defaults)
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.playerId = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.playerId = options.longs === String ? "0" : 0;
+            if (message.playerId != null && message.hasOwnProperty("playerId"))
+                if (typeof message.playerId === "number")
+                    object.playerId = options.longs === String ? String(message.playerId) : message.playerId;
+                else
+                    object.playerId = options.longs === String ? $util.Long.prototype.toString.call(message.playerId) : options.longs === Number ? new $util.LongBits(message.playerId.low >>> 0, message.playerId.high >>> 0).toNumber() : message.playerId;
             if (message.synList && message.synList.length) {
                 object.synList = [];
                 for (var j = 0; j < message.synList.length; ++j)
@@ -3440,6 +3551,412 @@ $root.hallserver_player = (function() {
         };
 
         return PlayerInfoSynNotice;
+    })();
+
+    hallserver_player.ReqChangeNickName = (function() {
+
+        /**
+         * Properties of a ReqChangeNickName.
+         * @memberof hallserver_player
+         * @interface IReqChangeNickName
+         * @property {string|null} [nickname] ReqChangeNickName nickname
+         */
+
+        /**
+         * Constructs a new ReqChangeNickName.
+         * @memberof hallserver_player
+         * @classdesc Represents a ReqChangeNickName.
+         * @implements IReqChangeNickName
+         * @constructor
+         * @param {hallserver_player.IReqChangeNickName=} [properties] Properties to set
+         */
+        function ReqChangeNickName(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ReqChangeNickName nickname.
+         * @member {string} nickname
+         * @memberof hallserver_player.ReqChangeNickName
+         * @instance
+         */
+        ReqChangeNickName.prototype.nickname = "";
+
+        /**
+         * Creates a new ReqChangeNickName instance using the specified properties.
+         * @function create
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {hallserver_player.IReqChangeNickName=} [properties] Properties to set
+         * @returns {hallserver_player.ReqChangeNickName} ReqChangeNickName instance
+         */
+        ReqChangeNickName.create = function create(properties) {
+            return new ReqChangeNickName(properties);
+        };
+
+        /**
+         * Encodes the specified ReqChangeNickName message. Does not implicitly {@link hallserver_player.ReqChangeNickName.verify|verify} messages.
+         * @function encode
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {hallserver_player.IReqChangeNickName} message ReqChangeNickName message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ReqChangeNickName.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.nickname != null && Object.hasOwnProperty.call(message, "nickname"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.nickname);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ReqChangeNickName message, length delimited. Does not implicitly {@link hallserver_player.ReqChangeNickName.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {hallserver_player.IReqChangeNickName} message ReqChangeNickName message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ReqChangeNickName.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ReqChangeNickName message from the specified reader or buffer.
+         * @function decode
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {hallserver_player.ReqChangeNickName} ReqChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ReqChangeNickName.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.hallserver_player.ReqChangeNickName();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.nickname = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ReqChangeNickName message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {hallserver_player.ReqChangeNickName} ReqChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ReqChangeNickName.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ReqChangeNickName message.
+         * @function verify
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ReqChangeNickName.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.nickname != null && message.hasOwnProperty("nickname"))
+                if (!$util.isString(message.nickname))
+                    return "nickname: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ReqChangeNickName message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {hallserver_player.ReqChangeNickName} ReqChangeNickName
+         */
+        ReqChangeNickName.fromObject = function fromObject(object) {
+            if (object instanceof $root.hallserver_player.ReqChangeNickName)
+                return object;
+            var message = new $root.hallserver_player.ReqChangeNickName();
+            if (object.nickname != null)
+                message.nickname = String(object.nickname);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ReqChangeNickName message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {hallserver_player.ReqChangeNickName} message ReqChangeNickName
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ReqChangeNickName.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults)
+                object.nickname = "";
+            if (message.nickname != null && message.hasOwnProperty("nickname"))
+                object.nickname = message.nickname;
+            return object;
+        };
+
+        /**
+         * Converts this ReqChangeNickName to JSON.
+         * @function toJSON
+         * @memberof hallserver_player.ReqChangeNickName
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ReqChangeNickName.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ReqChangeNickName
+         * @function getTypeUrl
+         * @memberof hallserver_player.ReqChangeNickName
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ReqChangeNickName.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/hallserver_player.ReqChangeNickName";
+        };
+
+        return ReqChangeNickName;
+    })();
+
+    hallserver_player.ResChangeNickName = (function() {
+
+        /**
+         * Properties of a ResChangeNickName.
+         * @memberof hallserver_player
+         * @interface IResChangeNickName
+         * @property {string|null} [nickname] ResChangeNickName nickname
+         */
+
+        /**
+         * Constructs a new ResChangeNickName.
+         * @memberof hallserver_player
+         * @classdesc Represents a ResChangeNickName.
+         * @implements IResChangeNickName
+         * @constructor
+         * @param {hallserver_player.IResChangeNickName=} [properties] Properties to set
+         */
+        function ResChangeNickName(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ResChangeNickName nickname.
+         * @member {string} nickname
+         * @memberof hallserver_player.ResChangeNickName
+         * @instance
+         */
+        ResChangeNickName.prototype.nickname = "";
+
+        /**
+         * Creates a new ResChangeNickName instance using the specified properties.
+         * @function create
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {hallserver_player.IResChangeNickName=} [properties] Properties to set
+         * @returns {hallserver_player.ResChangeNickName} ResChangeNickName instance
+         */
+        ResChangeNickName.create = function create(properties) {
+            return new ResChangeNickName(properties);
+        };
+
+        /**
+         * Encodes the specified ResChangeNickName message. Does not implicitly {@link hallserver_player.ResChangeNickName.verify|verify} messages.
+         * @function encode
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {hallserver_player.IResChangeNickName} message ResChangeNickName message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ResChangeNickName.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.nickname != null && Object.hasOwnProperty.call(message, "nickname"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.nickname);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ResChangeNickName message, length delimited. Does not implicitly {@link hallserver_player.ResChangeNickName.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {hallserver_player.IResChangeNickName} message ResChangeNickName message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ResChangeNickName.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ResChangeNickName message from the specified reader or buffer.
+         * @function decode
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {hallserver_player.ResChangeNickName} ResChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ResChangeNickName.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.hallserver_player.ResChangeNickName();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 2: {
+                        message.nickname = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ResChangeNickName message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {hallserver_player.ResChangeNickName} ResChangeNickName
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ResChangeNickName.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ResChangeNickName message.
+         * @function verify
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ResChangeNickName.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.nickname != null && message.hasOwnProperty("nickname"))
+                if (!$util.isString(message.nickname))
+                    return "nickname: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ResChangeNickName message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {hallserver_player.ResChangeNickName} ResChangeNickName
+         */
+        ResChangeNickName.fromObject = function fromObject(object) {
+            if (object instanceof $root.hallserver_player.ResChangeNickName)
+                return object;
+            var message = new $root.hallserver_player.ResChangeNickName();
+            if (object.nickname != null)
+                message.nickname = String(object.nickname);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ResChangeNickName message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {hallserver_player.ResChangeNickName} message ResChangeNickName
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ResChangeNickName.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults)
+                object.nickname = "";
+            if (message.nickname != null && message.hasOwnProperty("nickname"))
+                object.nickname = message.nickname;
+            return object;
+        };
+
+        /**
+         * Converts this ResChangeNickName to JSON.
+         * @function toJSON
+         * @memberof hallserver_player.ResChangeNickName
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ResChangeNickName.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ResChangeNickName
+         * @function getTypeUrl
+         * @memberof hallserver_player.ResChangeNickName
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ResChangeNickName.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/hallserver_player.ResChangeNickName";
+        };
+
+        return ResChangeNickName;
     })();
 
     return hallserver_player;

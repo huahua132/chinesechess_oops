@@ -23,6 +23,7 @@ export class HallViewComp extends CCComp {
         this.setButton();
         this.nodeTreeInfoLite();
         this.RefreshPlayerInfo();
+        this.RefreshItems();
 
         this.getNode("matching")!.active = false;
     }
@@ -46,9 +47,25 @@ export class HallViewComp extends CCComp {
     //刷新玩家信息
     RefreshPlayerInfo() {
         const entity = this.ent as HallEntity;
-        this.getNode("playerId")!.getComponent(Label)!.string = entity.HallModel.PlayerId.toString();
+        this.getNode("playerId")!.getComponent(Label)!.string = "ID:" + entity.HallModel.PlayerId.toString();
         this.getNode("nickName")!.getComponent(Label)!.string = entity.HallModel.NickName;
         this.getNode("rank")!.getComponent(Label)!.string = entity.HallModel.RankScore.toString();
+        this.getNode("levelVal")!.getComponent(Label)!.string = entity.HallModel.Level.toString();
+    }
+
+    //刷新道具显示
+    RefreshItems() {
+        const entity = this.ent as HallEntity;
+        let coinNum = 0;
+        if (entity.HallModel.ItemNumMap[10000002]) {
+            coinNum = entity.HallModel.ItemNumMap[10000002];
+        }
+        this.getNode("coinNum")!.getComponent(Label)!.string = coinNum.toString();
+        let silverNum = 0;
+        if (entity.HallModel.ItemNumMap[10000001]) {
+            silverNum = entity.HallModel.ItemNumMap[10000001];
+        }
+        this.getNode("silverNum")!.getComponent(Label)!.string = silverNum.toString();
     }
 
     /* 按钮事件*/

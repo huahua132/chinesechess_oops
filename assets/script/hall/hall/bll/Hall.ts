@@ -1,6 +1,6 @@
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { smc } from "../../../common/SingletonModuleComp"
-import {hallserver_player, hallserver_match} from "../../../../../protos-js/proto"
+import {hallserver_player, hallserver_match, hallserver_item} from "../../../../../protos-js/proto"
 import {HallEntity} from "../Hall"
 import {HallModelComp} from "../model/HallModelComp"
 import {oops} from "db://oops-framework/core/Oops"
@@ -52,6 +52,7 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
         smc.net.GetNode("hall").RegPushHandle("hallserver_player", "PlayerInfoNotice", (msgBody: hallserver_player.IPlayerInfoNotice)=> {
             smc.hall.HallModel.NickName = msgBody.nickname!;
             smc.hall.HallModel.RankScore = msgBody.rankScore!;
+            smc.hall.HallModel.Level = msgBody.level!;
             console.log("收到玩家信息 >>> ", msgBody, smc.hall.HallView);
             if (smc.hall.HallView) {
                 smc.hall.HallView.RefreshPlayerInfo();
@@ -90,6 +91,24 @@ export class HallSystem extends ecs.ComblockSystem implements ecs.IEntityEnterSy
                 }
             }
             smc.net.TryConnect("game", opt)
+        })
+
+        //收到道具数据
+        smc.net.GetNode("hall").RegPushHandle("hallserver_item", "ItemListNotice", (msgbody: hallserver_item.IItemListNotice) => {
+            console.log("收到道具数据 >>> ", msgbody, smc.hall.HallBll.IsMatchBtn);
+            for(let i = 0; i < msgbody.itemList!.length; i++) {
+                let oneItem = msgbody.itemList![i];
+                let itemId = oneItem.id
+                let itemCount = oneItem.count
+                if (!smc.hall.HallModel.ItemNumMap[itemId]) {
+                    smc.hall.HallModel.ItemNumMap[itemId] = 0;
+                }
+                smc.hall.HallModel.ItemNumMap[itemId] = itemCount;
+            }
+
+            if (smc.hall.HallView) {
+                smc.hall.HallView.RefreshItems();
+            }
         })
     }
 
